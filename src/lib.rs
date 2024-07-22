@@ -9,7 +9,6 @@
 //! - Missing implementations of the `Debug` and `Copy` traits for public structs and enums.
 //! - Adherence to Rust 2018 idioms and avoidance of trivial casts and unused qualifications.
 #![warn(
-    clippy::mod_module_files,
     clippy::unwrap_used,
     missing_docs,
     missing_debug_implementations,

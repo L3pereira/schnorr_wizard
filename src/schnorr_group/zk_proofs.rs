@@ -125,8 +125,8 @@ where
     ModP: ResidueParams<{ U2048::LIMBS }>,
 {
     // Compute s = r + cx mod q
-    let residue_c = Residue::<ModQ, { U256::LIMBS }>::new(&c);
-    let residue_sk = Residue::<ModQ, { U256::LIMBS }>::new(&sk);
+    let residue_c = Residue::<ModQ, { U256::LIMBS }>::new(c);
+    let residue_sk = Residue::<ModQ, { U256::LIMBS }>::new(sk);
     let csk = residue_c.mul(&residue_sk).retrieve();
     let z = r.add_mod(&csk, &group.modulus_q_value());
 
@@ -175,11 +175,7 @@ where
     let chc: U2048 = residue_h_c.mul(&residue_u).retrieve();
 
     // Check if g^z mod p == u * h^c mod p
-    if g_z == chc {
-        true
-    } else {
-        false
-    }
+    g_z == chc
 }
 
 #[cfg(test)]
