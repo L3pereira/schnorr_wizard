@@ -1,7 +1,12 @@
 /// This module implements interactive zero-knowledge (ZK) proofs,
 /// specifically designed for use within cryptographic protocols
 /// that require proving knowledge of a secret without revealing it.
-pub mod zk_proofs;
+pub mod interactive_zk;
+
+/// This module implements non interactive zero-knowledge (ZK) proofs,
+/// specifically designed for use within cryptographic protocols
+/// that require proving knowledge of a secret without revealing it.
+pub mod non_interactive_zk;
 
 /// # Utils Module
 ///

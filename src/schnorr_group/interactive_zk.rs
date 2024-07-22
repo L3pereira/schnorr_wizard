@@ -50,7 +50,7 @@ where
     Ok((Commitment { u, h }, r))
 }
 
-/// Verifies the first round of an interactive Schnorr proof.
+/// First round verification (verifies the commitments).
 ///
 /// # Parameters
 /// - `rng`: A mutable reference to an object implementing the `RngCore` and `CryptoRng` traits.
@@ -65,7 +65,7 @@ where
 /// # Returns
 /// A `Result` type that, on success, contains the challenge `c` as a `U256` value.
 /// On failure, it returns a `SchnorrError`.
-pub fn verify_interactive_first_round<R, ModQ, ModP>(
+pub fn verify_first_round<R, ModQ, ModP>(
     rng: &mut R,
     commitment: &Commitment,
     group: &SchnorrGroup<ModQ, ModP>,
@@ -75,20 +75,13 @@ where
     ModP: ResidueParams<{ U2048::LIMBS }>,
     R: RngCore + CryptoRng,
 {
-    if &commitment.h == &U2048::ZERO {
-        return Err(SchnorrError::ZkInteractiveError("h equal zero".to_string()));
-    }
-    if &commitment.u == &U2048::ZERO {
-        return Err(SchnorrError::ZkInteractiveError("u equal zero".to_string()));
-    }
-
     if !group.is_element_in_group_p(&commitment.u) {
-        return Err(SchnorrError::ZkInteractiveError(
+        return Err(SchnorrError::InteractiveZkError(
             "u doesn't belong to p".to_string(),
         ));
     }
     if !group.is_element_in_group_p(&commitment.h) {
-        return Err(SchnorrError::ZkInteractiveError(
+        return Err(SchnorrError::InteractiveZkError(
             "h doesn't belong to p".to_string(),
         ));
     }
@@ -99,7 +92,7 @@ where
     Ok(c)
 }
 
-/// Generates an interactive proof for Schnorr's protocol.
+/// Generates a proof for Schnorr's identification protocol.
 ///
 /// # Parameters
 /// - `r`: The random value used in the commitment.
@@ -114,7 +107,7 @@ where
 /// # Returns
 /// A `Result` type that, on success, contains the response `z` (the proof) as a `U256` value.
 /// On failure, it returns a `SchnorrError`.
-pub fn generate_interactive_proof<ModQ, ModP>(
+pub fn generate_proof<ModQ, ModP>(
     r: &U256,
     c: &U256,
     sk: &U256,
@@ -133,7 +126,7 @@ where
     Ok(z)
 }
 
-/// Verifies the interactive proof in Schnorr's protocol.
+/// Last round verirification (Verifies the proof).
 ///
 /// # Parameters
 ///
@@ -141,7 +134,6 @@ where
 /// - `commitment`: A reference to a `Commitment` object, which contains the commitment values `u` and `h`.
 /// - `z`: A reference to a `U256` value representing the response from the prover.
 /// - `c`: A reference to a `U256` value representing the challenge from the verifier.
-/// - `sk`: A reference to a `U256` value representing the secret key. This parameter is not directly used in this function but included for completeness and future extensions.
 /// - `group`: A reference to a `SchnorrGroup` object, which contains the parameters of the Schnorr group (ModQ and ModP).
 ///
 /// # Type Parameters
@@ -153,16 +145,22 @@ where
 /// # Returns
 ///
 /// A `bool` indicating whether the proof is valid (`true`) or not (`false`).
-pub fn verify_interactive_proof<ModQ, ModP>(
+pub fn verify_final_round<ModQ, ModP>(
     commitment: &Commitment,
     z: &U256,
     c: &U256,
     group: &SchnorrGroup<ModQ, ModP>,
-) -> bool
+) -> Result<bool, SchnorrError>
 where
     ModQ: ResidueParams<{ U256::LIMBS }>,
     ModP: ResidueParams<{ U2048::LIMBS }>,
 {
+    if !group.is_element_in_group_q::<{ U256::LIMBS }>(z) {
+        return Err(SchnorrError::InteractiveZkError(
+            "z doesn't belong to q".to_string(),
+        ));
+    }
+
     // Calculate g^z mod p
     let g_z = group.modpow_p(&group.g, z);
 
@@ -175,7 +173,7 @@ where
     let chc: U2048 = residue_h_c.mul(&residue_u).retrieve();
 
     // Check if g^z mod p == u * h^c mod p
-    g_z == chc
+    Ok(g_z == chc)
 }
 
 #[cfg(test)]
@@ -196,42 +194,71 @@ mod tests {
     }
 
     #[test]
-    fn test_verify_interactive_first_round() {
+    fn test_verify_first_round() {
         let mut rng = StdRng::seed_from_u64(12345);
         let group = SchnorrGroup::default();
         let sk = group.generate_secret_key(&mut rng, None).unwrap();
 
         let (commitment, _) = generate_commitment(&mut rng, &group, &sk).unwrap();
-        let challenge = verify_interactive_first_round(&mut rng, &commitment, &group).unwrap();
+        let challenge = verify_first_round(&mut rng, &commitment, &group).unwrap();
 
         assert!(group.is_element_in_group_q::<{ U256::LIMBS }>(&challenge));
     }
 
     #[test]
-    fn test_generate_interactive_proof() {
+    fn test_generate_proof() {
         let mut rng = StdRng::seed_from_u64(12345);
         let group = SchnorrGroup::default();
         let sk = group.generate_secret_key(&mut rng, None).unwrap();
 
         let (commitment, r) = generate_commitment(&mut rng, &group, &sk).unwrap();
-        let c = verify_interactive_first_round(&mut rng, &commitment, &group).unwrap();
-        let proof = generate_interactive_proof(&r, &c, &sk, &group).unwrap();
+        let c = verify_first_round(&mut rng, &commitment, &group).unwrap();
+        let proof = generate_proof(&r, &c, &sk, &group).unwrap();
 
         assert!(group.is_element_in_group_q::<{ U256::LIMBS }>(&proof));
     }
 
     #[test]
-    fn test_verify_interactive_proof() {
+    fn test_verify_final_round() {
         let mut rng = StdRng::seed_from_u64(12345);
         let group = SchnorrGroup::default();
         let sk = group.generate_secret_key(&mut rng, None).unwrap();
 
         let (commitment, r) = generate_commitment(&mut rng, &group, &sk).unwrap();
-        let c = verify_interactive_first_round(&mut rng, &commitment, &group).unwrap();
-        let z = generate_interactive_proof(&r, &c, &sk, &group).unwrap();
+        let c = verify_first_round(&mut rng, &commitment, &group).unwrap();
+        let z = generate_proof(&r, &c, &sk, &group).unwrap();
 
-        let is_valid = verify_interactive_proof(&commitment, &z, &c, &group);
+        let is_valid = verify_final_round(&commitment, &z, &c, &group).unwrap();
 
         assert!(is_valid);
+    }
+
+    #[test]
+    fn test_verify_final_round_fails() {
+        let mut rng = StdRng::seed_from_u64(12345);
+        let group = SchnorrGroup::default();
+        let sk = group.generate_secret_key(&mut rng, None).unwrap();
+
+        let (commitment, r) = generate_commitment(&mut rng, &group, &sk).unwrap();
+        let c = verify_first_round(&mut rng, &commitment, &group).unwrap();
+        let z = generate_proof(&r, &c, &sk, &group).unwrap();
+
+        let z_invalid = &group.modulus_q_value();
+        let error = verify_final_round(&commitment, &z_invalid, &c, &group)
+            .err()
+            .unwrap();
+        let error_verify = SchnorrError::InteractiveZkError("z doesn't belong to q".to_string());
+        assert_eq!(error, error_verify);
+
+        let z_invalid = &U256::ZERO;
+        let error = verify_final_round(&commitment, &z_invalid, &c, &group)
+            .err()
+            .unwrap();
+        let error_verify = SchnorrError::InteractiveZkError("z doesn't belong to q".to_string());
+        assert_eq!(error, error_verify);
+
+        let z_invalid = z.sub_mod(&U256::ONE, &group.modulus_q_value());
+        let is_valid = verify_final_round(&commitment, &z_invalid, &c, &group).unwrap();
+        assert!(!is_valid);
     }
 }

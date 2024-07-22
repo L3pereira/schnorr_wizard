@@ -5,8 +5,8 @@ use thiserror::Error;
 /// //!
 /// ### Variants
 /// - `GroupParametersError(String)`: Represents errors related to group parameters in the Schnorr signature scheme.
-/// - `ZkInteractiveError(String)`: Represents errors that occur during the Zero-Knowledge interactive protocol.
-/// - `ParseError`: Represents errors that occur during parsing of integers. This error variant is automatically generated from `std::num::ParseIntError`.
+/// - `InteractiveZkError(String)`: Represents errors that occur during the interactive Zero-Knowledge protocol.
+/// - `NonInteractiveZkError(String)`: Represents errors that occur during the non interactive Zero-Knowledge protocol.
 ///
 /// ### Functions
 /// - `group_parameters_error(msg: &str) -> Self`: A constructor function for creating a `GroupParametersError` variant. It takes a message string as input and returns an instance of `SchnorrError`.
@@ -16,9 +16,13 @@ pub enum SchnorrError {
     #[error("An error occurred: {0}")]
     GroupParametersError(String),
 
-    /// - `ZkInteractiveError(String)`: Represents errors that occur during the Zero-Knowledge interactive protocol.
-    #[error("zk interactive Error: {0}")]
-    ZkInteractiveError(String),
+    /// - `InteractiveZkError(String)`: Represents errors that occur during the interactive Zero-Knowledge protocol.
+    #[error("interactive zk Error: {0}")]
+    InteractiveZkError(String),
+
+    /// - `NonInteractiveZkError(String)`: Represents errors that occur during the non interactive Zero-Knowledge protocol.
+    #[error("non interactive zk Error: {0}")]
+    NonInteractiveZkError(String),
 }
 impl SchnorrError {
     /// - `group_parameters_error(msg: &str) -> Self`: A constructor function for creating a `GroupParametersError` variant. It takes a message string as input and returns an instance of `SchnorrError`.
