@@ -2,3 +2,4 @@
 /Cargo.lock
 /src/Secp256k1
 /src/schnorr.rs
+/src/utils.rs
