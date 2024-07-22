@@ -32,7 +32,7 @@ impl_modulus!(ModulusP, U2048, LARGE_PRIME_P_2048_BITS);
 /// - `p`: The modulus p parameter of the group.
 /// - `g`: The generator g of the group.
 ///
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct SchnorrGroup<ModQ, ModP> {
     /// - `q`: The modulus q parameter of the subgroup.
     pub q: ModQ,

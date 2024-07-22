@@ -8,6 +8,13 @@ pub mod interactive_zk;
 /// that require proving knowledge of a secret without revealing it.
 pub mod non_interactive_zk;
 
+/// A module containing implementations for Schnorr signatures.
+///
+/// This module provides structures and functions for generating and verifying Schnorr signatures,
+/// a digital signature scheme known for its simplicity and efficiency. The `signatures` module
+/// includes the `Signer` struct for creating signatures and a function for verifying them.
+pub mod signatures;
+
 /// # Utils Module
 ///
 /// This module provides utility functions and structures that are commonly used across the cryptographic library, especially within the zero-knowledge proofs implementations.

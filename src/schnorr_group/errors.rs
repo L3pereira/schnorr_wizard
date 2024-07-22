@@ -23,6 +23,10 @@ pub enum SchnorrError {
     /// - `NonInteractiveZkError(String)`: Represents errors that occur during the non interactive Zero-Knowledge protocol.
     #[error("non interactive zk Error: {0}")]
     NonInteractiveZkError(String),
+
+    /// - `SignatureError(String)`: An error that occurs during signature generation or verification.
+    #[error("signature Error: {0}")]
+    SignatureError(String),
 }
 impl SchnorrError {
     /// - `group_parameters_error(msg: &str) -> Self`: A constructor function for creating a `GroupParametersError` variant. It takes a message string as input and returns an instance of `SchnorrError`.
