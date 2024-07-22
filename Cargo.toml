@@ -1,0 +1,13 @@
+[package]
+name = "schnorr_wizard"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rand = "0.8.5"
+hex = "0.4.3"
+sha2 = "0.10.2"
+crypto-bigint = {version = "0.5.5", features = ["generic-array"]}
+crypto-primes = "0.5.0"
+k256 = { version= "0.13.3", features = ["arithmetic"] }
+thiserror = "1.0"
