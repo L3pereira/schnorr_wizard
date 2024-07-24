@@ -22,7 +22,7 @@
 
  - Each signer $i$ receives all $R_{i,j}$ broadcasted by all signers, and computes:
 
-$$R_j = \prod_{i=1}^n R_{i,j} \mod p \quad \text{for} \quad j = 1, \ldots, \nu \quad \text{where} \quad \nu \geq 2$$
+    $$R_j = \prod_{i=1}^n R_{i,j} \mod p \quad \text{for} \quad j = 1, \ldots, \nu \quad \text{where} \quad \nu \geq 2$$
 
 ### Aggregate Coefficients
 
@@ -66,15 +66,15 @@ $$R_j = \prod_{i=1}^n R_{i,j} \mod p \quad \text{for} \quad j = 1, \ldots, \nu \
 ## Verification
 ### Aggregate Signature
 
-- Each signer $i$ aggregates all the partial signatures \(s_i\):
+- Each signer $i$ aggregates all the partial signatures $\(s_i\)$:
 
     $$s = \sum_{i=1}^n s_i \mod q$$
 
 
-The final signature on the message $(m)$ is $(\tilde{Pk}, R, s)$.
+The final signature on the message $m$ is $(\tilde{Pk}, R, s)$.
 
 
-To verify the signature $(\tilde{Pk}, R, s)$ on the message $(m)$, each signer $i$ computes:
+To verify the signature $(\tilde{Pk}, R, s)$ on the message $m$, each signer $i$ computes:
 
 $g^s \equiv R \cdot \tilde{Pk}^c \mod p$
 
