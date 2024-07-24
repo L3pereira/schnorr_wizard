@@ -27,6 +27,10 @@ pub enum SchnorrError {
     /// - `SignatureError(String)`: An error that occurs during signature generation or verification.
     #[error("signature Error: {0}")]
     SignatureError(String),
+
+    /// - `MuSig2Error(String)`: An error that occurs during multiparty signature generation or verification.
+    #[error("musig2 Error: {0}")]
+    MuSig2Error(String),
 }
 impl SchnorrError {
     /// - `group_parameters_error(msg: &str) -> Self`: A constructor function for creating a `GroupParametersError` variant. It takes a message string as input and returns an instance of `SchnorrError`.

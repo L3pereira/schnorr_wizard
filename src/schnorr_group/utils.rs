@@ -1,4 +1,4 @@
-use crate::schnorr_group::errors::SchnorrError;
+use crate::schnorr_group::{errors::SchnorrError, U2048_LIMBS, U256_LIMBS};
 use crypto_bigint::modular::constant_mod::{Residue, ResidueParams};
 use crypto_bigint::{impl_modulus, Encoding, Integer, NonZero, RandomMod, Uint, U2048, U256};
 use rand::{CryptoRng, RngCore};
@@ -50,9 +50,7 @@ impl Default for SchnorrGroup<ModulusQ, ModulusP> {
         }
     }
 }
-impl<ModQ: ResidueParams<{ U256::LIMBS }>, ModP: ResidueParams<{ U2048::LIMBS }>>
-    SchnorrGroup<ModQ, ModP>
-{
+impl<ModQ: ResidueParams<U256_LIMBS>, ModP: ResidueParams<U2048_LIMBS>> SchnorrGroup<ModQ, ModP> {
     /// ## `new(q: ModQ, p: ModP, g: U2048) -> Result<Self, SchnorrError>`
     /// Constructs a new SchnorrGroup with the given parameters q, p, and g.
     ///
@@ -91,7 +89,7 @@ impl<ModQ: ResidueParams<{ U256::LIMBS }>, ModP: ResidueParams<{ U2048::LIMBS }>
             ));
         }
 
-        let g_q_mod_p: U2048 = Residue::<ModP, { U2048::LIMBS }>::new(&g)
+        let g_q_mod_p: U2048 = Residue::<ModP, U2048_LIMBS>::new(&g)
             .pow(&ModQ::MODULUS)
             .retrieve();
 
@@ -118,7 +116,7 @@ impl<ModQ: ResidueParams<{ U256::LIMBS }>, ModP: ResidueParams<{ U2048::LIMBS }>
         base: &U256,
         exponent: &Uint<RHS_LIMBS>,
     ) -> U256 {
-        Residue::<ModQ, { U256::LIMBS }>::new(base)
+        Residue::<ModQ, U256_LIMBS>::new(base)
             .pow(exponent)
             .retrieve()
     }
@@ -137,8 +135,54 @@ impl<ModQ: ResidueParams<{ U256::LIMBS }>, ModP: ResidueParams<{ U2048::LIMBS }>
         base: &U2048,
         exponent: &Uint<RHS_LIMBS>,
     ) -> U2048 {
-        Residue::<ModP, { U2048::LIMBS }>::new(base)
+        Residue::<ModP, U2048_LIMBS>::new(base)
             .pow(exponent)
+            .retrieve()
+    }
+
+    /// Performs modular multiplication of multiple `U256` values under modulus `Q`.
+    ///
+    /// This function takes a slice of references to `U256` values and performs a modular multiplication
+    /// of these values under a specific modulus `Q`. The multiplication is done in a way that ensures
+    /// the result stays within the bounds of modulus `Q`.
+    ///
+    /// # Arguments
+    ///
+    /// * `values` - A slice of references to `U256` values that are to be multiplied together.
+    ///
+    /// # Returns
+    ///
+    /// * `U256` - The result of the modular multiplication of the input values under modulus `Q`.
+    pub fn modmul_q(&self, values: &[&U256]) -> U256 {
+        values
+            .iter()
+            .map(|&val| Residue::<ModQ, U256_LIMBS>::new(val))
+            .fold(Residue::<ModQ, U256_LIMBS>::new(&U256::ONE), |acc, x| {
+                acc.mul(&x)
+            })
+            .retrieve()
+    }
+
+    /// Performs modular multiplication of multiple `U2048` values under modulus `P`.
+    ///
+    /// This function takes a slice of references to `U2048` values and performs a modular multiplication
+    /// of these values under a specific modulus `P`. The multiplication is done in a way that ensures
+    /// the result stays within the bounds of modulus `P`.
+    ///
+    /// # Arguments
+    ///
+    /// * `values` - A slice of references to `U2048` values that are to be multiplied together.
+    ///
+    /// # Returns
+    ///
+    /// * `U2048` - The result of the modular multiplication of the input values under modulus `P`.
+    pub fn modmul_p(&self, values: &[&U2048]) -> U2048 {
+        values
+            .iter()
+            .map(|&val| Residue::<ModP, U2048_LIMBS>::new(val))
+            .fold(Residue::<ModP, U2048_LIMBS>::new(&U2048::ONE), |acc, x| {
+                acc.mul(&x)
+            })
             .retrieve()
     }
 
@@ -420,7 +464,7 @@ mod tests {
         let seed = [25u8; 32]; // Fixed seed for deterministic tests
         let mut rng: StdRng = SeedableRng::from_seed(seed);
 
-        let group = SchnorrGroup::<ModulusQ, ModulusP>::default();
+        let group = SchnorrGroup::default();
 
         let message = b"";
 
@@ -483,24 +527,71 @@ mod tests {
 
     #[test]
     fn test_is_element_in_group_q() {
-        const LIMBS: usize = U256::LIMBS;
         let group = SchnorrGroup::default();
         let element = group
             .modulus_q_value()
             .sub_mod(&U256::ONE, &group.modulus_q_value());
 
-        let is_element = group.is_element_in_group_q::<LIMBS>(&element);
+        let is_element = group.is_element_in_group_q::<U256_LIMBS>(&element);
 
         assert!(is_element);
 
-        let is_element = group.is_element_in_group_q::<LIMBS>(&U256::ONE);
+        let is_element = group.is_element_in_group_q::<U256_LIMBS>(&U256::ONE);
 
         assert!(is_element);
 
-        let is_element = group.is_element_in_group_q::<LIMBS>(&U256::ZERO);
+        let is_element = group.is_element_in_group_q::<U256_LIMBS>(&U256::ZERO);
         assert!(!is_element);
 
-        let is_element = group.is_element_in_group_q::<LIMBS>(&group.modulus_q_value());
+        let is_element = group.is_element_in_group_q::<U256_LIMBS>(&group.modulus_q_value());
         assert!(!is_element);
+    }
+
+    #[test]
+    fn test_modmul_q() {
+        let group = SchnorrGroup::default();
+        let values = [
+            &U256::from_u8(2),
+            &U256::from_u8(3),
+            &U256::from_u8(4),
+            &group.modulus_q_value(),
+        ];
+        let result = group.modmul_q(&values);
+
+        let residue1 = Residue::<ModulusQ, U256_LIMBS>::new(&U256::from_u8(2));
+        let residue2 = Residue::<ModulusQ, U256_LIMBS>::new(&U256::from_u8(3));
+        let residue3 = Residue::<ModulusQ, U256_LIMBS>::new(&U256::from_u8(4));
+        let residue4 = Residue::<ModulusQ, U256_LIMBS>::new(&group.modulus_q_value());
+        let expected = residue1
+            .mul(&residue2)
+            .mul(&residue3)
+            .mul(&residue4)
+            .retrieve();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_modmul_p() {
+        let group = SchnorrGroup::default();
+        let values = [
+            &U2048::from_u8(2),
+            &U2048::from_u8(3),
+            &U2048::from_u8(4),
+            &group.modulus_p_value(),
+        ];
+        let result = group.modmul_p(&values);
+
+        let residue1 = Residue::<ModulusP, U2048_LIMBS>::new(&U2048::from_u8(2));
+        let residue2 = Residue::<ModulusP, U2048_LIMBS>::new(&U2048::from_u8(3));
+        let residue3 = Residue::<ModulusP, U2048_LIMBS>::new(&U2048::from_u8(4));
+        let residue4 = Residue::<ModulusP, U2048_LIMBS>::new(&group.modulus_p_value());
+        let expected = residue1
+            .mul(&residue2)
+            .mul(&residue3)
+            .mul(&residue4)
+            .retrieve();
+
+        assert_eq!(result, expected);
     }
 }
