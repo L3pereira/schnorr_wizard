@@ -22,7 +22,7 @@
 
  - Each signer $i$ receives all $R_{i,j}$ broadcasted by all signers, and computes:
 
-    $R_j = \prod_{i=1}^n R_{i,j} \mod p \quad \text{for} \quad j = 1, \ldots, \nu \quad \text{where} \quad \nu \geq 2$
+$$R_j = \prod_{i=1}^n R_{i,j} \mod p \quad \text{for} \quad j = 1, \ldots, \nu \quad \text{where} \quad \nu \geq 2$$
 
 ### Aggregate Coefficients
 
@@ -38,7 +38,7 @@
 
 - Each signer $i$ computes the aggregated public key $(\tilde{Pk})$:
 
-    $\tilde{Pk} = \prod_{i=1}^n Pk_i^{a_i} \mod p$
+    $$\tilde{Pk} = \prod_{i=1}^n Pk_i^{a_i} \mod p$$
 
 ### Effective Nonce
 
@@ -48,7 +48,7 @@
 
     and the effective nonce $R$:
 
-    $R = \prod_{j=1}^\nu R_j^{b^{j-1}} \mod p$
+    $$R = \prod_{j=1}^\nu R_j^{b^{j-1}} \mod p$$
 
 ### Challenge
 
@@ -60,7 +60,7 @@
 
 - Each signer $i$ computes their partial signature:
 
-    $s_i = \left( c \cdot a_i \cdot sk_i + \sum_{j=1}^\nu r_{i,j} \cdot b^{j-1} \right) \mod q$
+    $$s_i = \left( c \cdot a_i \cdot sk_i + \sum_{j=1}^\nu r_{i,j} \cdot b^{j-1} \right) \mod q$$
 
 - Each signer broadcasts his $s_i$
 ## Verification
@@ -68,7 +68,7 @@
 
 - Each signer $i$ aggregates all the partial signatures \(s_i\):
 
-    $s = \sum_{i=1}^n s_i \mod q$
+    $$s = \sum_{i=1}^n s_i \mod q$$
 
 
 The final signature on the message $(m)$ is $(\tilde{Pk}, R, s)$.
