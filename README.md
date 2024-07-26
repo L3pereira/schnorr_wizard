@@ -1,3 +1,7 @@
+# schnorr_wizard
+
+`schnorr_wizard` is a Rust library that provides implementations of Schnorr's signature scheme, interactive and non-interactive zero-knowledge proofs, and MuSig2 multi-signature protocol. This library is designed for educational purposes and may contain bugs. I am not a cryptographer, and the library is intended to facilitate the study and understanding of these cryptographic protocols. Future improvements could include creating wrappers around values and implementing the `Add`, `Sub`, `Mul`, and `Bitxor` traits to ensure that only modular arithmetic around the order of the groups is available.
+
 # Table of Contents
 
 1. [Schnorr's Interactive Zero-Knowledge Proof (Identification Protocol)](#schnorrs-interactive-zero-knowledge-proof-identification-protocol)
