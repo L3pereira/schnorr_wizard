@@ -1,9 +1,13 @@
 # Table of Contents
 
 1. [Schnorr's Interactive Zero-Knowledge Proof (Identification Protocol)](#schnorrs-interactive-zero-knowledge-proof-identification-protocol)
-2. [Schnorr's Non-Interactive Schnorr's Zero-Knowledge Proof](#schnorrs-non-interactive-schnorrs-zero-knowledge-proof)
-3. [Schnorr's Signatures](#schnorrs-signatures)
-4. [MuSig2 Implementation](#musig2-implementation)
+    - [Code Example](#schnorrs-interactive-zero-knowledge-proof-example)
+3. [Schnorr's Non-Interactive Schnorr's Zero-Knowledge Proof](#schnorrs-non-interactive-schnorrs-zero-knowledge-proof)
+    - [Code Example](#schnorrs-non-interactive-zero-knowledge-proof-example)
+5. [Schnorr's Signatures](#schnorrs-signatures)
+    - [Code Example](#schnorrs-signatures-example)
+7. [MuSig2 Implementation](#musig2-implementation)
+    - [Code Example](#schnorrs-musig2-example)
 
 # Schnorr's Interactive Zero-Knowledge Proof (Identification Protocol)
 
@@ -51,7 +55,7 @@ Schnorr's protocol is an interactive zero-knowledge proof protocol that allows a
 
 If the equation holds, Bob is convinced that Alice knows $\( sk \)$.
 
-# Schnorr Interactive Zero-Knowledge Proof Example
+# Schnorr's Interactive Zero-Knowledge Proof Example
 
 ## Code
 ```rust
@@ -125,7 +129,7 @@ Schnorr's protocol can be made non-interactive using the Fiat-Shamir heuristic, 
 
 If the equation holds, the verifier is convinced that Alice knows `sk`.
 
-# Schnorr Interactive Zero-Knowledge Proof Example
+# Schnorr's Non Interactive Zero-Knowledge Proof Example
 
 ## Code
 
@@ -309,7 +313,7 @@ First round
 Second round
 - Partial Signature $s_i$
 
-# Schnorr Group and MuSig2 Example
+# Schnorr's MuSig2 Example
 
 ## Code
 
