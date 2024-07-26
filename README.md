@@ -123,7 +123,7 @@ Schnorr's protocol can be made non-interactive using the Fiat-Shamir heuristic, 
 
 - Alice sends the proof $`(u, h, c, z)`$ to Bob.
 
-### 7. Verification
+### 6. Verification
 - Bob checks if:
 -  $u,h \in \mathbb{Z}_p^*$
 -  $z,c \in \mathbb{Z}_q^*$
@@ -227,15 +227,15 @@ Schnorr MuSig2 is a multi-signature scheme that allows multiple signers to colla
 
 ## Schnorr's Group, secret key and public key Setup
 
-### Secret Key Generation
+### 1. Secret Key Generation
 - Each signer $i$ generates a random $sk_i \leftarrow \mathbb{Z}_q$
-### Public Key Generation
+### 2. Public Key Generation
 
 - Each signer $i$ generates his public key $Pk_i=g^{sk_i} \mod p$, by using the sub group generator $g$ and his secret key $sk_i$.
 - Each signer broadcasts his $Pk_i$
 
 ## First Round
-### Nonce Generation
+### 3. Nonce Generation
 
 - Each signer $i$ generates $\nu$ random nonces $k_{i,j} \leftarrow \mathbb{Z}_q$ and computes:
 
@@ -243,13 +243,13 @@ Schnorr MuSig2 is a multi-signature scheme that allows multiple signers to colla
 
 - Each signer broadcasts his $R_{i,j}$
 
-### Aggregate Nonces
+### 4. Aggregate Nonces
 
  - Each signer $i$ receives all $R_{i,j}$ broadcasted by all signers, and computes:
 
     $$R_j = \prod_{i=1}^n R_{i,j} \mod p \quad \text{for} \quad j = 1, \ldots, \nu \quad \text{where} \quad \nu \geq 2$$
 
-### Aggregate Coefficients
+### 5. Aggregate Coefficients
 
 - Each signer $i$ receives all $(Pk_i)$ broadcasted by all signers, and computes:
 
@@ -259,13 +259,13 @@ Schnorr MuSig2 is a multi-signature scheme that allows multiple signers to colla
 
     $a_i = H_{\text{agg}}([Pk_1,...,Pk_n],Pk_i) \mod q$
 
-### Aggregate Public Key
+### 6. Aggregate Public Key
 
 - Each signer $i$ computes the aggregated public key $(\tilde{Pk})$:
 
     $$\tilde{Pk} = \prod_{i=1}^n Pk_i^{a_i} \mod p$$
 
-### Effective Nonce
+### 7. Effective Nonce
 
 - Each signer $i$ computes the coefficient $b$:
 
@@ -275,13 +275,13 @@ Schnorr MuSig2 is a multi-signature scheme that allows multiple signers to colla
 
     $$R = \prod_{j=1}^\nu R_j^{b^{j-1}} \mod p$$
 
-### Challenge
+### 8. Challenge
 
 - Each signer $i$ computes the challenge $c$:
 
     $c = H_{\text{sig}}(\tilde{Pk}, R, m) \mod q$
 ## Second Round
-### Partial Signature
+### 9. Partial Signature
 
 - Each signer $i$ computes their partial signature:
 
@@ -289,7 +289,7 @@ Schnorr MuSig2 is a multi-signature scheme that allows multiple signers to colla
 
 - Each signer broadcasts his $s_i$
 ## Verification
-### Aggregate Signature
+### 10. Aggregate Signature
 
 - Each signer $i$ aggregates all the partial signatures $\(s_i\)$:
 
